@@ -271,50 +271,56 @@
                 chatboxOpen = false;
             }, 500);
         }
+// Add this event listener to the input field
+document.getElementById('chatbox-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {  // Check for Enter key (without Shift)
+        event.preventDefault();  // Prevent the default "Enter" behavior (e.g., adding a newline)
+        sendMessage();  // Call the sendMessage function
+    }
+});
 
-        async function sendMessage() {
-            const input = document.getElementById('chatbox-input');
-            const message = input.value.trim();
-            if (message) {
-                appendMessage(message, 'user-message');
-                input.value = '';
+async function sendMessage() {
+    const input = document.getElementById('chatbox-input');
+    const message = input.value.trim();
+    if (message) {
+        appendMessage(message, 'user-message');
+        input.value = '';
 
-                try {
-                    const response = await fetch('http://localhost:3000/api/chat', {  // Update with your backend URL
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ message }),
-                    });
+        try {
+            const response = await fetch('http://localhost:3000/api/chat', {  // Update with your backend URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message }),
+            });
 
-                    const data = await response.json();
-                    console.log('Response from API:', data);
+            const data = await response.json();
+            console.log('Response from API:', data);
 
-                    if (data && data.modelUrl) {
-                        // Embed the model in the chatbox using <model-viewer>
-                        const modelMessage = `
-                            <p>Your model is ready! You can view it here:</p>
-                            <model-viewer 
-                                src="${data.modelUrl}" 
-                                alt="3D model" 
-                                auto-rotate 
-                                camera-controls 
-                                style="width: 100%; height: 300px; margin: 10px 0;">
-                            </model-viewer>
-                            <a href="${data.modelUrl}" target="_blank">Click here to view the model in full screen</a>
-                        `;
-                        appendMessage(modelMessage, 'blob-message');
-                    } else {
-                        appendMessage('Oops! Something went wrong. Please try again later.', 'blob-message');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    appendMessage('Oops! Something went wrong. Please try again later.', 'blob-message');
-                }
+            if (data && data.modelUrl) {
+                // Embed the model in the chatbox using <model-viewer>
+                const modelMessage = `
+                    <p>Your model is ready! You can view it here:</p>
+                    <model-viewer 
+                        src="${data.modelUrl}" 
+                        alt="3D model" 
+                        auto-rotate 
+                        camera-controls 
+                        style="width: 100%; height: 300px; margin: 10px 0;">
+                    </model-viewer>
+                    <a href="${data.modelUrl}" target="_blank">Click here to view the model in full screen</a>
+                `;
+                appendMessage(modelMessage, 'blob-message');
+            } else {
+                appendMessage('Oops! Something went wrong. Please try again later.', 'blob-message');
             }
+        } catch (error) {
+            console.error('Error:', error);
+            appendMessage('Oops! Something went wrong. Please try again later.', 'blob-message');
         }
-
+    }
+}
         function appendMessage(content, className) {
             const chatboxBody = document.getElementById('chatbox-body');
             const messageDiv = document.createElement('div');
